@@ -108,22 +108,22 @@ class DualSensorCard extends LitElement {
     });
 }
 
-render() {
-  return html`
-    <ha-card class="card">
-      <div class="left">
-        <ha-icon icon="mdi:power"></ha-icon>
-        <div class="toggle-button ${this._switchState}" @click="${this._toggleSwitch}">
-          <div class="toggle-circle"></div>
+  render() {
+    return html`
+      <ha-card class="card">
+        <div class="left">
+          <ha-icon icon="mdi:power"></ha-icon>
+          <div class="toggle-button ${this._switchState}" @click="${this._toggleSwitch}">
+            <div class="toggle-circle"></div>
+          </div>
         </div>
-      </div>
-      <div class="right">
-        <ha-icon icon="mdi:flash"></ha-icon>
-        <span class="kwh">${this._kwhValue} kWh</span>
-      </div>
-    </ha-card>
-  `;
-}
+        <div class="right">
+          <ha-icon icon="mdi:flash"></ha-icon>
+          <span class="kwh">${this._kwhValue} kWh</span>
+        </div>
+      </ha-card>
+    `;
+  }
 
   getCardSize() {
     return 1;
