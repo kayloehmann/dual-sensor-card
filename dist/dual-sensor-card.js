@@ -15,6 +15,9 @@ class DualSensorCard extends LitElement {
       background-color: var(--ha-card-background, white);
       border-radius: 8px;
       box-shadow: var(--ha-card-box-shadow, 0 2px 4px rgba(0,0,0,0.1));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .header {
       font-size: 1.2em;
@@ -25,12 +28,14 @@ class DualSensorCard extends LitElement {
     }
     .content {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
     }
     .left, .right {
       display: flex;
       align-items: center;
+      justify-content: center;
+      margin: 10px 0;
     }
     ha-icon {
       margin-right: 8px;
@@ -113,9 +118,6 @@ class DualSensorCard extends LitElement {
     if (!this.hass || !this.config) return html``;
 
     const switchEntity = this.hass.states[this.config.entity_switch];
-
-    console.log("DualSensorCard: Switch Entity Data", switchEntity);
-
     const switchName = switchEntity?.attributes?.friendly_name || this.config.name || this.config.entity_switch;
 
     return html`
@@ -137,7 +139,7 @@ class DualSensorCard extends LitElement {
         </div>
       </ha-card>
     `;
-}
+  }
 
   getCardSize() {
     return 1;
