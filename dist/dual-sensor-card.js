@@ -90,6 +90,7 @@ class DualSensorCard extends LitElement {
 
     this._switchState = switchEntity.state || "off";
     this._kwhValue = kwhEntity.state || "0";
+    this.requestUpdate();
   }
 
   _toggleSwitch() {
@@ -100,11 +101,18 @@ class DualSensorCard extends LitElement {
 
     this.hass.callService(domain, turnOn ? "turn_on" : "turn_off", {
       entity_id: this.config.entity_switch,
+    }).then(() => {
+      this._switchState = turnOn ? "on" : "off";
+      this.requestUpdate();
+    }).catch((error) => {
+      console.error("DualSensorCard: Error toggling switch:", error);
     });
   }
 
   render() {
-    const switchEntity = this.hass?.states[this.config.entity_switch];
+    if (!this.hass || !this.config) return html``;
+
+    const switchEntity = this.hass.states[this.config.entity_switch];
     const switchName = switchEntity?.attributes?.friendly_name || this.config.name || this.config.entity_switch;
 
     return html`
@@ -115,7 +123,7 @@ class DualSensorCard extends LitElement {
         <div class="content">
           <div class="left">
             <ha-icon icon="mdi:power"></ha-icon>
-            <div class="toggle-button ${this._switchState}" @click="${this._toggleSwitch}">
+            <div class="toggle-button ${this._switchState}" @click="${() => this._toggleSwitch()}">
               <div class="toggle-circle"></div>
             </div>
           </div>
