@@ -80,13 +80,20 @@ class DualSensorCard extends LitElement {
     const kwhEntity = hass.states[this.config.entity_kwh];
 
     if (!switchEntity || !kwhEntity) {
-      console.error(`DualSensorCard: Missing entity ${this.config.entity_switch} or ${this.config.entity_kwh}`);
-      return;
+        console.error(`DualSensorCard: Missing entity ${this.config.entity_switch} or ${this.config.entity_kwh}`);
+        return;
     }
 
-    this._switchState = switchEntity.state || "off";
-    this._kwhValue = kwhEntity.state || "0";
-  }
+    // Check if values have changed before re-rendering
+    const newSwitchState = switchEntity.state || "off";
+    const newKwhValue = kwhEntity.state || "0";
+
+    if (newSwitchState !== this._switchState || newKwhValue !== this._kwhValue) {
+        this._switchState = newSwitchState;
+        this._kwhValue = newKwhValue;
+        this.requestUpdate(); // Ensures UI updates properly
+    }
+}
 
   _toggleSwitch() {
     if (!this.hass || !this.config.entity_switch) return;
@@ -101,22 +108,22 @@ class DualSensorCard extends LitElement {
     });
 }
 
-  render() {
-    return html`
-      <ha-card class="card">
-        <div class="left">
-          <ha-icon icon="mdi:power"></ha-icon>
-          <div class="toggle-button ${this._switchState}" @click="${this._toggleSwitch}">
-            <div class="toggle-circle"></div>
-          </div>
+render() {
+  return html`
+    <ha-card class="card">
+      <div class="left">
+        <ha-icon icon="mdi:power"></ha-icon>
+        <div class="toggle-button ${this._switchState}" @click="${this._toggleSwitch}">
+          <div class="toggle-circle"></div>
         </div>
-        <div class="right">
-          <ha-icon icon="mdi:flash"></ha-icon>
-          <span class="kwh">${this._kwhValue} kWh</span>
-        </div>
-      </ha-card>
-    `;
-  }
+      </div>
+      <div class="right">
+        <ha-icon icon="mdi:flash"></ha-icon>
+        <span class="kwh">${this._kwhValue} kWh</span>
+      </div>
+    </ha-card>
+  `;
+}
 
   getCardSize() {
     return 1;
