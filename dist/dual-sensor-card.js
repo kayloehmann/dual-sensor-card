@@ -21,6 +21,7 @@ class DualSensorCard extends LitElement {
     font-weight: bold;
     text-align: center;
     padding-bottom: 10px;
+    color: var(--primary-text-color);
   }
   .content {
     display: flex;
@@ -111,29 +112,36 @@ class DualSensorCard extends LitElement {
     });
 }
 
-  render() {
-    const switchName = this.hass?.states[this.config.entity_switch]?.attributes?.friendly_name || this.config.entity_switch;
+render() {
+  if (!this.hass || !this.config) return html``;
 
-    return html`
-      <ha-card class="card">
-        <div class="header">
-          <span class="title">${switchName}</span>
-        </div>
-        <div class="content">
-          <div class="left">
-            <ha-icon icon="mdi:power"></ha-icon>
-            <div class="toggle-button ${this._switchState}" @click="${this._toggleSwitch}">
-              <div class="toggle-circle"></div>
-            </div>
+  const switchEntity = this.hass.states[this.config.entity_switch];
+
+  console.log("DualSensorCard: Switch Entity Data", switchEntity);
+
+  // Ensure the name is correctly fetched
+  const switchName = switchEntity?.attributes?.friendly_name || this.config.name || this.config.entity_switch;
+
+  return html`
+    <ha-card class="card">
+      <div class="header">
+        <span class="title">${switchName}</span>
+      </div>
+      <div class="content">
+        <div class="left">
+          <ha-icon icon="mdi:power"></ha-icon>
+          <div class="toggle-button ${this._switchState}" @click="${this._toggleSwitch}">
+            <div class="toggle-circle"></div>
           </div>
-          <div class="right">
-            <ha-icon icon="mdi:flash"></ha-icon>
-            <span class="kwh">${this._kwhValue} kWh</span>
-          </div>
         </div>
-      </ha-card>
-    `;
-  }
+        <div class="right">
+          <ha-icon icon="mdi:flash"></ha-icon>
+          <span class="kwh">${this._kwhValue} kWh</span>
+        </div>
+      </div>
+    </ha-card>
+  `;
+}
 
   getCardSize() {
     return 1;
