@@ -2,6 +2,8 @@ class DualSensorCard extends HTMLElement {
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
+      this._switchState = "off"; // Default state
+      this._kwhValue = "0"; // Default kWh value
     }
   
     setConfig(config) {
@@ -9,14 +11,40 @@ class DualSensorCard extends HTMLElement {
         throw new Error("You need to define both entity_switch and entity_kwh.");
       }
       this.config = config;
+    }
+  
+    set hass(hass) {
+      if (!this.config) return;
+      this.hass = hass;
+  
+      // Get new entity states
+      const newSwitchState = hass.states[this.config.entity_switch]?.state || "off";
+      const newKwhValue = hass.states[this.config.entity_kwh]?.state || "0";
+  
+      // Only update UI if values changed (prevents infinite render loop)
+      if (newSwitchState !== this._switchState || newKwhValue !== this._kwhValue) {
+        this._switchState = newSwitchState;
+        this._kwhValue = newKwhValue;
+        this.render();
+      }
+    }
+  
+    _toggleSwitch() {
+      if (!this.hass || !this.config.entity_switch) return;
+  
+      const turnOn = this._switchState === "off";
+      
+      this.hass.callService("switch", turnOn ? "turn_on" : "turn_off", {
+        entity_id: this.config.entity_switch,
+      });
+  
+      // Optimistically update UI (before Home Assistant sends new state)
+      this._switchState = turnOn ? "on" : "off";
       this.render();
     }
   
     render() {
       if (!this.shadowRoot) return;
-  
-      const switchState = this._switchState || "off";
-      const kwhValue = this._kwhValue || "0";
   
       this.shadowRoot.innerHTML = `
         <style>
@@ -49,11 +77,11 @@ class DualSensorCard extends HTMLElement {
           .toggle-button {
             width: 40px;
             height: 20px;
-            background-color: ${switchState === "on" ? "green" : "red"};
+            background-color: ${this._switchState === "on" ? "green" : "red"};
             border-radius: 10px;
             display: flex;
             align-items: center;
-            justify-content: ${switchState === "on" ? "flex-end" : "flex-start"};
+            justify-content: ${this._switchState === "on" ? "flex-end" : "flex-start"};
             padding: 2px;
             cursor: pointer;
           }
@@ -74,39 +102,16 @@ class DualSensorCard extends HTMLElement {
             </div>
             <div class="right">
               <ha-icon icon="mdi:flash"></ha-icon>
-              <span class="kwh">${kwhValue} kWh</span>
+              <span class="kwh">${this._kwhValue} kWh</span>
             </div>
           </div>
         </ha-card>
       `;
   
-      // Add event listener for toggle button
+      // Attach event listener after rendering
       this.shadowRoot.getElementById("toggle").addEventListener("click", () => {
         this._toggleSwitch();
       });
-    }
-  
-    set hass(hass) {
-      if (!this.config) return;
-  
-      this.hass = hass;
-      this._switchState = hass.states[this.config.entity_switch]?.state || "off";
-      this._kwhValue = hass.states[this.config.entity_kwh]?.state || "0";
-  
-      this.render();
-    }
-  
-    _toggleSwitch() {
-      if (!this.hass || !this.config.entity_switch) return;
-  
-      const turnOn = this._switchState === "off";
-      this.hass.callService("switch", turnOn ? "turn_on" : "turn_off", {
-        entity_id: this.config.entity_switch,
-      });
-  
-      // Optimistically update UI before the state updates
-      this._switchState = turnOn ? "on" : "off";
-      this.render();
     }
   
     getCardSize() {
