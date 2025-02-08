@@ -113,6 +113,9 @@ class DualSensorCard extends LitElement {
     if (!this.hass || !this.config) return html``;
 
     const switchEntity = this.hass.states[this.config.entity_switch];
+
+    console.log("DualSensorCard: Switch Entity Data", switchEntity);
+
     const switchName = switchEntity?.attributes?.friendly_name || this.config.name || this.config.entity_switch;
 
     return html`
@@ -134,7 +137,7 @@ class DualSensorCard extends LitElement {
         </div>
       </ha-card>
     `;
-  }
+}
 
   getCardSize() {
     return 1;
