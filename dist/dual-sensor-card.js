@@ -9,54 +9,57 @@ class DualSensorCard extends LitElement {
   };
 
   static styles = css`
-    .card {
-      padding: 16px;
-      font-family: Arial, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background-color: var(--ha-card-background, white);
-      border-radius: 8px;
-      box-shadow: var(--ha-card-box-shadow, 0 2px 4px rgba(0,0,0,0.1));
-      cursor: pointer;
-    }
-    .left {
-      display: flex;
-      align-items: center;
-    }
-    .right {
-      display: flex;
-      align-items: center;
-    }
-    ha-icon {
-      margin-right: 8px;
-    }
-    .kwh {
-      font-size: 1.2em;
-      font-weight: bold;
-    }
-    .toggle-button {
-      width: 40px;
-      height: 20px;
-      background-color: var(--switch-color, red);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 2px;
-      cursor: pointer;
-    }
-    .toggle-button.on {
-      background-color: green;
-      justify-content: flex-end;
-    }
-    .toggle-circle {
-      width: 16px;
-      height: 16px;
-      background-color: white;
-      border-radius: 50%;
-    }
-  `;
+  .card {
+    padding: 16px;
+    font-family: Arial, sans-serif;
+    background-color: var(--ha-card-background, white);
+    border-radius: 8px;
+    box-shadow: var(--ha-card-box-shadow, 0 2px 4px rgba(0,0,0,0.1));
+  }
+  .header {
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 10px;
+  }
+  .content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .left, .right {
+    display: flex;
+    align-items: center;
+  }
+  ha-icon {
+    margin-right: 8px;
+  }
+  .kwh {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+  .toggle-button {
+    width: 40px;
+    height: 20px;
+    background-color: var(--switch-color, red);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2px;
+    cursor: pointer;
+  }
+  .toggle-button.on {
+    background-color: green;
+    justify-content: flex-end;
+  }
+  .toggle-circle {
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    border-radius: 50%;
+  }
+`;
 
   constructor() {
     super();
