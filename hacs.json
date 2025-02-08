@@ -1,5 +1,5 @@
 {
     "name": "Dual Sensor Card",
-    "content_in_root": true,
-    "filename": "dual-sensor-card.js"
-  }
+    "filename": "dual-sensor-card.js",
+    "type": "plugin"
+}
