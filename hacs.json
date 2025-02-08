@@ -1,0 +1,9 @@
+{
+    "name": "Dual Sensor Card",
+    "filename": "dual-sensor-card.js",
+    "type": "module",
+    "render_readme": true,
+    "category": "Lovelace",
+    "description": "A Home Assistant card displaying a switch and kWh sensor.",
+    "authors": ["Kay Löhmann"]
+  }
