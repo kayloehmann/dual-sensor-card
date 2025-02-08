@@ -93,12 +93,13 @@ class DualSensorCard extends LitElement {
 
     const turnOn = this._switchState === "off";
 
-    this.hass.callService("switch", turnOn ? "turn_on" : "turn_off", {
-      entity_id: this.config.entity_switch,
-    });
+    // Use the correct domain (switch or light) based on entity_id
+    const domain = this.config.entity_switch.startsWith("light.") ? "light" : "switch";
 
-    this._switchState = turnOn ? "on" : "off";
-  }
+    this.hass.callService(domain, turnOn ? "turn_on" : "turn_off", {
+        entity_id: this.config.entity_switch,
+    });
+}
 
   render() {
     return html`
