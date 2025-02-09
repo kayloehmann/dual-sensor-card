@@ -14,6 +14,7 @@ class DualSensorCard extends HTMLElement {
     if (!switchEntity || !sensorEntity) return;
 
     const friendlyName = sensorEntity.attributes.friendly_name || 'Dual Sensor';
+    const icon = this.config.icon || 'mdi:lightbulb';
 
     this.shadowRoot.innerHTML = `
             <style>
@@ -30,6 +31,12 @@ class DualSensorCard extends HTMLElement {
                 .info {
                     flex-grow: 1;
                     text-align: left;
+                    display: flex;
+                    align-items: center;
+                }
+                .icon {
+                    font-size: 24px;
+                    margin-right: 8px;
                 }
                 .title {
                     font-size: 16px;
@@ -65,8 +72,11 @@ class DualSensorCard extends HTMLElement {
             </style>
             <div class="card">
                 <div class="info">
-                    <div class="title">${friendlyName}</div>
-                    <div class="value">${sensorEntity.state} ${sensorEntity.attributes.unit_of_measurement || ''}</div>
+                    <ha-icon class="icon" icon="${icon}"></ha-icon>
+                    <div>
+                        <div class="title">${friendlyName}</div>
+                        <div class="value">${sensorEntity.state} ${sensorEntity.attributes.unit_of_measurement || ''}</div>
+                    </div>
                 </div>
                 <div class="toggle ${switchEntity.state === 'on' ? '' : 'off'}" id="toggle-switch">
                     <div class="handle"></div>
