@@ -42,6 +42,11 @@ class DualSensorCard extends LitElement {
         font-weight: bold;
         margin-bottom: 8px;
       }
+      .label {
+        font-size: 0.9em;
+        color: var(--secondary-text-color);
+        margin-bottom: 8px;
+      }
     `;
   }
 
@@ -50,8 +55,8 @@ class DualSensorCard extends LitElement {
       return html``;
     }
 
-    const switchEntity = this.config.switch_entity ? this.hass.states[this.config.switch_entity] : null;
-    const sensorEntity = this.config.sensor_entity ? this.hass.states[this.config.sensor_entity] : null;
+    const switchEntity = this.config.entity_switch ? this.hass.states[this.config.entity_switch] : null;
+    const sensorEntity = this.config.entity_kwh ? this.hass.states[this.config.entity_kwh] : null;
 
     const switchState = switchEntity ? switchEntity.state : 'unavailable';
     const sensorState = sensorEntity ? sensorEntity.state : 'unavailable';
@@ -63,15 +68,16 @@ class DualSensorCard extends LitElement {
         ${this.config.show_friendly_name ? html`<div class="friendly-name">${friendlyName}</div>` : ''}
         ${this.config.show_icon ? html`<ha-icon class="icon" .icon=${this.config.icon || 'mdi:lightbulb'}></ha-icon>` : ''}
         ${this.config.show_state ? html`<div class="state">Switch: ${switchState}</div>` : ''}
-        <div class="state">Sensor: ${sensorState}</div>
+        <div class="label">Sensor Value:</div>
+        <div class="state">${sensorState}</div>
         <div class="last-updated">Last updated: ${lastUpdated}</div>
       </div>
     `;
   }
 
   setConfig(config) {
-    if (!config.switch_entity || !config.sensor_entity) {
-      throw new Error('Please define both switch_entity and sensor_entity');
+    if (!config.entity_switch || !config.entity_kwh) {
+      throw new Error('Please define both entity_switch and entity_kwh');
     }
     this.config = {
       show_friendly_name: true,
@@ -117,21 +123,21 @@ class DualSensorCardEditor extends LitElement {
 
     return html`
       <div class="config-row">
-        <div class="config-label">Switch Entity:</div>
+        <div class="config-label">Switch Entity (entity_switch):</div>
         <ha-entity-picker
           .hass=${this.hass}
-          .value=${this.config.switch_entity}
+          .value=${this.config.entity_switch}
           @value-changed=${this._valueChanged}
-          .configValue=${'switch_entity'}
+          .configValue=${'entity_switch'}
         ></ha-entity-picker>
       </div>
       <div class="config-row">
-        <div class="config-label">Sensor Entity:</div>
+        <div class="config-label">Sensor Entity (entity_kwh):</div>
         <ha-entity-picker
           .hass=${this.hass}
-          .value=${this.config.sensor_entity}
+          .value=${this.config.entity_kwh}
           @value-changed=${this._valueChanged}
-          .configValue=${'sensor_entity'}
+          .configValue=${'entity_kwh'}
         ></ha-entity-picker>
       </div>
       <div class="config-row">
