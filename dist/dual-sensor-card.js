@@ -31,7 +31,7 @@ class DualSensorCard extends HTMLElement {
                 }
                 .title {
                     font-size: 16px;
-                    font-weight: bold;
+                    font-weight: normal;
                 }
                 .value {
                     font-size: 14px;
