@@ -82,8 +82,6 @@ class DualSensorCard extends LitElement {
 
   set hass(hass) {
     if (!this.config || !hass) return;
-    
-    this.hass = hass;
 
     const switchEntity = hass.states[this.config.entity_switch];
     const kwhEntity = hass.states[this.config.entity_kwh];
@@ -128,7 +126,7 @@ class DualSensorCard extends LitElement {
         <div class="content">
           <div class="left">
             <ha-icon icon="mdi:power"></ha-icon>
-            <div class="toggle-button ${this._switchState}" @click="${() => this._toggleSwitch()}">
+            <div class="toggle-button ${this._switchState}" @click="${this._toggleSwitch}">
               <div class="toggle-circle"></div>
             </div>
           </div>
