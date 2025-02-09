@@ -27,6 +27,9 @@ class DualSensorCard extends HTMLElement {
                     background-color: var(--card-background-color, white);
                     box-shadow: var(--ha-card-box-shadow, none);
                     font-family: Arial, sans-serif;
+                    width: 100%;
+                    height: 100%;
+                    box-sizing: border-box;
                 }
                 .info {
                     flex-grow: 1;
