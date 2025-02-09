@@ -66,11 +66,13 @@ class DualSensorCard extends HTMLElement {
                     <div class="title">${this.config.name || 'Dual Sensor'}</div>
                     <div class="value">${sensorEntity.state} ${sensorEntity.attributes.unit_of_measurement || ''}</div>
                 </div>
-                <div class="toggle ${switchEntity.state === 'on' ? '' : 'off'}" @click="this.toggleSwitch()">
+                <div class="toggle ${switchEntity.state === 'on' ? '' : 'off'}" id="toggle-switch">
                     <div class="handle"></div>
                 </div>
             </div>
         `;
+
+    this.shadowRoot.querySelector('#toggle-switch').addEventListener('click', () => this.toggleSwitch());
   }
 
   toggleSwitch() {
