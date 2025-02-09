@@ -18,6 +18,10 @@ class DualSensorCard extends HTMLElement {
 
     this.shadowRoot.innerHTML = `
             <style>
+                :host {
+                    display: block;
+                    height: 100%;
+                }
                 .card {
                     display: flex;
                     justify-content: space-between;
@@ -123,43 +127,3 @@ class DualSensorCard extends HTMLElement {
 }
 
 customElements.define('dual-sensor-card', DualSensorCard);
-
-class DualSensorCardEditor extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-  }
-
-  setConfig(config) {
-    this.config = config;
-    this.render();
-  }
-
-  render() {
-    this.shadowRoot.innerHTML = `
-            <style>
-                .editor {
-                    padding: 16px;
-                }
-                label {
-                    display: block;
-                    margin-bottom: 8px;
-                }
-                input {
-                    width: 100%;
-                    padding: 4px;
-                }
-            </style>
-            <div class="editor">
-                <label>Switch Entity:</label>
-                <input id="switch_entity" type="text" value="${this.config.switch_entity || ''}">
-                <label>Sensor Entity:</label>
-                <input id="sensor_entity" type="text" value="${this.config.sensor_entity || ''}">
-                <label>Icon:</label>
-                <input id="icon" type="text" value="${this.config.icon || ''}">
-            </div>
-        `;
-  }
-}
-
-customElements.define('dual-sensor-card-editor', DualSensorCardEditor);
