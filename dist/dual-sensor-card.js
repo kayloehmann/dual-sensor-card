@@ -135,7 +135,7 @@ class DualSensorCardEditor extends HTMLElement {
   }
 
   setConfig(config) {
-    this.config = config;
+    this.config = { ...config };
     this.render();
   }
 
@@ -156,25 +156,18 @@ class DualSensorCardEditor extends HTMLElement {
             </style>
             <div class="editor">
                 <label>Switch Entity:</label>
-                <input id="switch_entity" type="text" value="${this.config.switch_entity || ''}">
+                <input id="switch_entity" type="text" value="${this.config.switch_entity || ''}" onchange="this.updateConfig(event, 'switch_entity')">
                 <label>Sensor Entity:</label>
-                <input id="sensor_entity" type="text" value="${this.config.sensor_entity || ''}">
+                <input id="sensor_entity" type="text" value="${this.config.sensor_entity || ''}" onchange="this.updateConfig(event, 'sensor_entity')">
                 <label>Icon:</label>
-                <input id="icon" type="text" value="${this.config.icon || ''}">
+                <input id="icon" type="text" value="${this.config.icon || ''}" onchange="this.updateConfig(event, 'icon')">
             </div>
         `;
   }
 
-  static getConfigElement() {
-    return document.createElement('dual-sensor-card-editor');
-  }
-
-  static getStubConfig() {
-    return {
-      switch_entity: "switch.example",
-      sensor_entity: "sensor.example",
-      icon: "mdi:lightbulb"
-    };
+  updateConfig(event, key) {
+    this.config[key] = event.target.value;
+    this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
   }
 }
 
