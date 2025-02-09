@@ -20,6 +20,7 @@ class DualSensorCard extends HTMLElement {
     const iconSize = this.config.icon_size || '24px';
     const tapAction = this.config.tap_action || 'toggle';
     const holdAction = this.config.hold_action || 'more-info';
+    const lastUpdated = new Date(sensorEntity.last_updated).toLocaleString();
 
     const switchState = switchEntity.state === 'on';
     const sensorValue = `${sensorEntity.state} ${sensorEntity.attributes.unit_of_measurement || ''}`;
@@ -58,6 +59,11 @@ class DualSensorCard extends HTMLElement {
                     color: var(--primary-text-color);
                     display: ${showState ? 'block' : 'none'};
                 }
+                .last-updated {
+                    font-size: 12px;
+                    color: var(--secondary-text-color, grey);
+                    margin-top: 4px;
+                }
                 .toggle {
                     margin-top: 10px;
                     cursor: pointer;
@@ -83,6 +89,7 @@ class DualSensorCard extends HTMLElement {
                 <ha-icon class="icon" icon="${icon}"></ha-icon>
                 <div class="title">${friendlyName}</div>
                 <div class="value">${sensorValue}</div>
+                <div class="last-updated">Zuletzt aktualisiert: ${lastUpdated}</div>
                 <div class="toggle" id="toggle-switch">
                     <div class="handle"></div>
                 </div>
