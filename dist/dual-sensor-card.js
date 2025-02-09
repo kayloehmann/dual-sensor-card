@@ -36,6 +36,7 @@ class DualSensorCard extends HTMLElement {
                 .value {
                     font-size: 14px;
                     color: var(--primary-text-color);
+                    font-weight: normal;
                 }
                 .toggle {
                     cursor: pointer;
