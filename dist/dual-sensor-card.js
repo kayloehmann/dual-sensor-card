@@ -14,6 +14,7 @@ class DualSensorCard extends HTMLElement {
     if (!switchEntity || !sensorEntity) return;
 
     const friendlyName = this.config.name || sensorEntity.attributes.friendly_name || 'Dual Sensor';
+    const icon = this.config.icon || 'mdi:lightbulb';
     const switchState = switchEntity.state === 'on';
     const sensorValue = `${sensorEntity.state} ${sensorEntity.attributes.unit_of_measurement || ''}`;
 
@@ -36,6 +37,10 @@ class DualSensorCard extends HTMLElement {
                     box-shadow: var(--ha-card-box-shadow, none);
                     font-family: Arial, sans-serif;
                     text-align: center;
+                }
+                .icon {
+                    font-size: 32px;
+                    color: var(--state-icon-color, #44739e);
                 }
                 .title {
                     font-size: 16px;
@@ -67,6 +72,7 @@ class DualSensorCard extends HTMLElement {
                 }
             </style>
             <div class="card">
+                <ha-icon class="icon" icon="${icon}"></ha-icon>
                 <div class="title">${friendlyName}</div>
                 <div class="value">${sensorValue}</div>
                 <div class="toggle" id="toggle-switch">
@@ -103,7 +109,8 @@ class DualSensorCard extends HTMLElement {
   static getStubConfig() {
     return {
       switch_entity: "switch.example",
-      sensor_entity: "sensor.example"
+      sensor_entity: "sensor.example",
+      icon: "mdi:lightbulb"
     };
   }
 }
@@ -134,6 +141,10 @@ class DualSensorCardEditor extends HTMLElement {
       (entity) => entity.startsWith('switch.') || entity.startsWith('sensor.')
     );
 
+    const mdiIcons = [
+      "mdi:lightbulb", "mdi:power", "mdi:fan", "mdi:thermometer", "mdi:gauge"
+    ];
+
     this.shadowRoot.innerHTML = `
             <style>
                 .editor {
@@ -158,11 +169,17 @@ class DualSensorCardEditor extends HTMLElement {
                 <select id="sensor_entity">
                     ${entities.filter(e => e.startsWith('sensor.')).map(e => `<option value="${e}" ${this.config.sensor_entity === e ? 'selected' : ''}>${e}</option>`).join('')}
                 </select>
+                
+                <label>Icon:</label>
+                <select id="icon">
+                    ${mdiIcons.map(icon => `<option value="${icon}" ${this.config.icon === icon ? 'selected' : ''}>${icon}</option>`).join('')}
+                </select>
             </div>
         `;
 
     this.shadowRoot.querySelector('#switch_entity').addEventListener('change', (event) => this.updateConfig(event, 'switch_entity'));
     this.shadowRoot.querySelector('#sensor_entity').addEventListener('change', (event) => this.updateConfig(event, 'sensor_entity'));
+    this.shadowRoot.querySelector('#icon').addEventListener('change', (event) => this.updateConfig(event, 'icon'));
   }
 
   updateConfig(event, key) {
