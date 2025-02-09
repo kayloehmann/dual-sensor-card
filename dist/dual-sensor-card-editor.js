@@ -71,3 +71,5 @@ export class DualSensorCardEditor extends LitElement {
         this.configChanged(this._config);
     }
 }
+
+customElements.define('dual-sensor-card-editor', DualSensorCardEditor);
