@@ -23,6 +23,7 @@ class DualSensorCard extends LitElement {
         display: flex;
         flex-direction: column;
         align-items: center;
+        text-align: center;
       }
       .icon {
         color: var(--paper-item-icon-color);
@@ -35,6 +36,11 @@ class DualSensorCard extends LitElement {
       .last-updated {
         font-size: 0.8em;
         color: var(--secondary-text-color);
+      }
+      .friendly-name {
+        font-size: 1.1em;
+        font-weight: bold;
+        margin-bottom: 8px;
       }
     `;
   }
@@ -50,12 +56,14 @@ class DualSensorCard extends LitElement {
     const switchState = switchEntity ? switchEntity.state : 'unavailable';
     const sensorState = sensorEntity ? sensorEntity.state : 'unavailable';
     const lastUpdated = sensorEntity ? new Date(sensorEntity.last_updated).toLocaleTimeString() : 'unavailable';
+    const friendlyName = switchEntity ? switchEntity.attributes.friendly_name : 'Unavailable';
 
     return html`
       <div class="card-content">
+        ${this.config.show_friendly_name ? html`<div class="friendly-name">${friendlyName}</div>` : ''}
         ${this.config.show_icon ? html`<ha-icon class="icon" .icon=${this.config.icon || 'mdi:lightbulb'}></ha-icon>` : ''}
-        ${this.config.show_state ? html`<div class="state">${switchState}</div>` : ''}
-        <div class="state">${sensorState}</div>
+        ${this.config.show_state ? html`<div class="state">Switch: ${switchState}</div>` : ''}
+        <div class="state">Sensor: ${sensorState}</div>
         <div class="last-updated">Last updated: ${lastUpdated}</div>
       </div>
     `;
@@ -66,6 +74,7 @@ class DualSensorCard extends LitElement {
       throw new Error('Please define both switch_entity and sensor_entity');
     }
     this.config = {
+      show_friendly_name: true,
       show_icon: true,
       show_state: true,
       icon: 'mdi:lightbulb',
@@ -126,6 +135,14 @@ class DualSensorCardEditor extends LitElement {
         ></ha-entity-picker>
       </div>
       <div class="config-row">
+        <div class="config-label">Show Friendly Name:</div>
+        <ha-switch
+          .checked=${this.config.show_friendly_name}
+          @change=${this._valueChanged}
+          .configValue=${'show_friendly_name'}
+        ></ha-switch>
+      </div>
+      <div class="config-row">
         <div class="config-label">Show Icon:</div>
         <ha-switch
           .checked=${this.config.show_icon}
@@ -167,5 +184,9 @@ class DualSensorCardEditor extends LitElement {
   }
 }
 
-customElements.define('dual-sensor-card', DualSensorCard);
-customElements.define('dual-sensor-card-editor', DualSensorCardEditor);
+if (!customElements.get('dual-sensor-card')) {
+  customElements.define('dual-sensor-card', DualSensorCard);
+}
+if (!customElements.get('dual-sensor-card-editor')) {
+  customElements.define('dual-sensor-card-editor', DualSensorCardEditor);
+}
