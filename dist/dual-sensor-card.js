@@ -73,19 +73,6 @@ class DualSensorCard extends LitElement {
     };
   }
 
-  _handleAction(ev, action) {
-    ev.stopPropagation();
-    const event = new Event(action.action, {
-      bubbles: true,
-      composed: true,
-    });
-    event.detail = {
-      config: this.config,
-      entityId: this.config.entity_switch,
-    };
-    this.dispatchEvent(event);
-  }
-
   _toggleSwitch() {
     this.hass.callService('homeassistant', 'toggle', {
       entity_id: this.config.entity_switch,
