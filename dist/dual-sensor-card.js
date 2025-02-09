@@ -13,6 +13,8 @@ class DualSensorCard extends HTMLElement {
 
     if (!switchEntity || !sensorEntity) return;
 
+    const friendlyName = sensorEntity.attributes.friendly_name || 'Dual Sensor';
+
     this.shadowRoot.innerHTML = `
             <style>
                 .card {
@@ -63,7 +65,7 @@ class DualSensorCard extends HTMLElement {
             </style>
             <div class="card">
                 <div class="info">
-                    <div class="title">${this.config.name || 'Dual Sensor'}</div>
+                    <div class="title">${friendlyName}</div>
                     <div class="value">${sensorEntity.state} ${sensorEntity.attributes.unit_of_measurement || ''}</div>
                 </div>
                 <div class="toggle ${switchEntity.state === 'on' ? '' : 'off'}" id="toggle-switch">
