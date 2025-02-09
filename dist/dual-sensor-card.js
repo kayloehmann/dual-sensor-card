@@ -135,3 +135,25 @@ window.customCards.push({
   preview: false,
   description: "A card to display a switch and a sensor value."
 });
+
+class DualSensorCardEditor extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  }
+
+  setConfig(config) {
+    this.config = { ...config };
+    this.render();
+  }
+
+  render() {
+    this.shadowRoot.innerHTML = `
+            <div class="editor">
+                <p>Dual Sensor Card Configuration</p>
+            </div>
+        `;
+  }
+}
+
+customElements.define('dual-sensor-card-editor', DualSensorCardEditor);
