@@ -13,50 +13,42 @@ class DualSensorCard extends HTMLElement {
 
     if (!switchEntity || !sensorEntity) return;
 
-    const friendlyName = sensorEntity.attributes.friendly_name || 'Dual Sensor';
-    const icon = this.config.icon || 'mdi:lightbulb';
+    const friendlyName = this.config.name || sensorEntity.attributes.friendly_name || 'Dual Sensor';
+    const switchState = switchEntity.state === 'on';
+    const sensorValue = `${sensorEntity.state} ${sensorEntity.attributes.unit_of_measurement || ''}`;
 
     this.shadowRoot.innerHTML = `
             <style>
                 :host {
                     display: block;
+                    width: 100%;
                     height: 100%;
                 }
                 .card {
                     display: flex;
+                    flex-direction: column;
                     justify-content: space-between;
                     align-items: center;
                     padding: 16px;
                     border-radius: 8px;
                     background-color: var(--card-background-color, white);
+                    border: 1px solid rgba(0, 0, 0, 0.1);
                     box-shadow: var(--ha-card-box-shadow, none);
                     font-family: Arial, sans-serif;
-                    width: 100%;
-                    height: 100%;
-                    box-sizing: border-box;
-                }
-                .info {
-                    flex-grow: 1;
-                    text-align: left;
-                    display: flex;
-                    align-items: center;
-                }
-                .icon {
-                    font-size: 24px;
-                    margin-right: 8px;
+                    text-align: center;
                 }
                 .title {
                     font-size: 16px;
-                    font-weight: normal;
+                    font-weight: bold;
                 }
                 .value {
                     font-size: 14px;
                     color: var(--primary-text-color);
-                    font-weight: normal;
                 }
                 .toggle {
+                    margin-top: 10px;
                     cursor: pointer;
-                    background: var(--switch-checked-color, green);
+                    background: ${switchState ? 'var(--switch-checked-color, green)' : 'var(--switch-unchecked-color, grey)'};
                     border-radius: 16px;
                     width: 40px;
                     height: 20px;
@@ -65,27 +57,19 @@ class DualSensorCard extends HTMLElement {
                     padding: 2px;
                     transition: background 0.3s;
                 }
-                .toggle.off {
-                    background: var(--switch-unchecked-color, grey);
-                }
                 .toggle .handle {
                     width: 16px;
                     height: 16px;
                     background: white;
                     border-radius: 50%;
                     transition: transform 0.3s;
-                    transform: translateX(${switchEntity.state === 'on' ? '20px' : '0'});
+                    transform: translateX(${switchState ? '20px' : '0'});
                 }
             </style>
             <div class="card">
-                <div class="info">
-                    <ha-icon class="icon" icon="${icon}"></ha-icon>
-                    <div>
-                        <div class="title">${friendlyName}</div>
-                        <div class="value">${sensorEntity.state} ${sensorEntity.attributes.unit_of_measurement || ''}</div>
-                    </div>
-                </div>
-                <div class="toggle ${switchEntity.state === 'on' ? '' : 'off'}" id="toggle-switch">
+                <div class="title">${friendlyName}</div>
+                <div class="value">${sensorValue}</div>
+                <div class="toggle" id="toggle-switch">
                     <div class="handle"></div>
                 </div>
             </div>
@@ -96,7 +80,6 @@ class DualSensorCard extends HTMLElement {
 
   toggleSwitch() {
     if (!this._hass || !this.config.switch_entity) return;
-
     this._hass.callService('switch', 'toggle', {
       entity_id: this.config.switch_entity
     });
@@ -120,21 +103,12 @@ class DualSensorCard extends HTMLElement {
   static getStubConfig() {
     return {
       switch_entity: "switch.example",
-      sensor_entity: "sensor.example",
-      icon: "mdi:lightbulb"
+      sensor_entity: "sensor.example"
     };
   }
 }
 
 customElements.define('dual-sensor-card', DualSensorCard);
-
-window.customCards = window.customCards || [];
-window.customCards.push({
-  type: "dual-sensor-card",
-  name: "Dual Sensor Card",
-  preview: false,
-  description: "A card to display a switch and a sensor value."
-});
 
 class DualSensorCardEditor extends HTMLElement {
   constructor() {
@@ -143,7 +117,7 @@ class DualSensorCardEditor extends HTMLElement {
   }
 
   setConfig(config) {
-    this.config = { ...config };
+    this.config = { ...config } || {};
     this.render();
   }
 
@@ -154,6 +128,7 @@ class DualSensorCardEditor extends HTMLElement {
 
   render() {
     if (!this._hass) return;
+    if (!this.config) this.config = {};
 
     const entities = Object.keys(this._hass.states).filter(
       (entity) => entity.startsWith('switch.') || entity.startsWith('sensor.')
@@ -191,7 +166,7 @@ class DualSensorCardEditor extends HTMLElement {
   }
 
   updateConfig(event, key) {
-    if (!this.config) return;
+    if (!this.config) this.config = {};
     this.config = { ...this.config, [key]: event.target.value };
     this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
   }
