@@ -1,198 +1,144 @@
-import { LitElement, html, css } from 'https://unpkg.com/lit-element/lit-element.js?module';
-import { styleMap } from 'https://unpkg.com/lit-html/directives/style-map.js?module';
+import { LitElement, html, css } from 'lit';
+import { styles } from './styles.js';
 
 class DualSensorCard extends LitElement {
   static get properties() {
     return {
-      hass: {},
-      config: {},
+      hass: Object,
+      config: Object,
     };
   }
 
   static get styles() {
     return css`
+      ${styles}
       :host {
         display: block;
-        border: 1px solid var(--primary-color);
-        border-radius: 4px;
-        padding: 16px;
-        background-color: var(--card-background-color);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        padding: var(--ha-card-padding, 12px);
+        min-height: 100px;
       }
-      .card-content {
-        display: flex;
-        flex-direction: column;
+      .container {
+        display: grid;
+        grid-template-columns: auto 1fr;
         align-items: center;
-        text-align: center;
+        gap: 12px;
       }
       .icon {
-        color: var(--paper-item-icon-color);
-        margin-bottom: 8px;
+        color: rgba(var(--rgb-state-icon-color), 1);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+      }
+      .content {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .name {
+        font-size: 16px;
+        color: var(--primary-text-color);
+        font-weight: normal;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .state {
-        font-size: 1.2em;
-        margin-bottom: 8px;
-      }
-      .last-updated {
-        font-size: 0.8em;
+        font-size: 14px;
         color: var(--secondary-text-color);
+        margin: 4px 0 0;
       }
-      .friendly-name {
-        font-size: 1.1em;
-        font-weight: bold;
-        margin-bottom: 8px;
-      }
-      .label {
-        font-size: 0.9em;
+      .updated {
+        font-size: 12px;
         color: var(--secondary-text-color);
-        margin-bottom: 8px;
+        margin-top: 4px;
       }
     `;
   }
 
-  render() {
-    if (!this.config || !this.hass) {
-      return html``;
-    }
-
-    const switchEntity = this.config.entity_switch ? this.hass.states[this.config.entity_switch] : null;
-    const sensorEntity = this.config.entity_kwh ? this.hass.states[this.config.entity_kwh] : null;
-
-    const switchState = switchEntity ? switchEntity.state : 'unavailable';
-    const sensorState = sensorEntity ? sensorEntity.state : 'unavailable';
-    const lastUpdated = sensorEntity ? new Date(sensorEntity.last_updated).toLocaleTimeString() : 'unavailable';
-    const friendlyName = switchEntity ? switchEntity.attributes.friendly_name : 'Unavailable';
-
-    return html`
-      <div class="card-content">
-        ${this.config.show_friendly_name ? html`<div class="friendly-name">${friendlyName}</div>` : ''}
-        ${this.config.show_icon ? html`<ha-icon class="icon" .icon=${this.config.icon || 'mdi:lightbulb'}></ha-icon>` : ''}
-        ${this.config.show_state ? html`<div class="state">Switch: ${switchState}</div>` : ''}
-        <div class="label">Sensor Value:</div>
-        <div class="state">${sensorState}</div>
-        <div class="last-updated">Last updated: ${lastUpdated}</div>
-      </div>
-    `;
+  constructor() {
+    super();
+    this._toggleSwitch = this._toggleSwitch.bind(this);
   }
 
   setConfig(config) {
     if (!config.entity_switch || !config.entity_kwh) {
-      throw new Error('Please define both entity_switch and entity_kwh');
+      throw new Error('Entities müssen definiert sein');
     }
     this.config = {
-      show_friendly_name: true,
-      show_icon: true,
       show_state: true,
-      icon: 'mdi:lightbulb',
+      show_icon: true,
+      icon_height: '40px',
       ...config,
     };
+  }
+
+  _handleAction(ev, action) {
+    ev.stopPropagation();
+    const event = new Event(action.action, {
+      bubbles: true,
+      composed: true,
+    });
+    event.detail = {
+      config: this.config,
+      entityId: this.config.entity_switch,
+    };
+    this.dispatchEvent(event);
+  }
+
+  _toggleSwitch() {
+    this.hass.callService('homeassistant', 'toggle', {
+      entity_id: this.config.entity_switch,
+    });
+  }
+
+  render() {
+    if (!this.hass || !this.config) return html``;
+
+    const switchEntity = this.hass.states[this.config.entity_switch];
+    const sensorEntity = this.hass.states[this.config.entity_kwh];
+
+    if (!switchEntity || !sensorEntity) return html`<ha-card>Entities not found</ha-card>`;
+
+    const lastUpdated = new Date(sensorEntity.last_updated).toLocaleTimeString();
+
+    return html`
+      <ha-card>
+        <div class="container">
+          ${this.config.show_icon ? html`
+            <div 
+              class="icon"
+              style="height: ${this.config.icon_height}"
+              @click=${this._toggleSwitch}
+            >
+              <ha-icon .icon=${switchEntity.attributes.icon || 'mdi:power'}></ha-icon>
+            </div>
+          ` : ''}
+          <div class="content">
+            <div class="name">${switchEntity.attributes.friendly_name}</div>
+            ${this.config.show_state ? html`
+              <div class="state">
+                ${sensorEntity.state} ${sensorEntity.attributes.unit_of_measurement || ''}
+              </div>
+            ` : ''}
+            <div class="updated">Letzte Aktualisierung: ${lastUpdated}</div>
+          </div>
+        </div>
+      </ha-card>
+    `;
   }
 
   getCardSize() {
     return 3;
   }
-
-  static getConfigElement() {
-    return document.createElement('dual-sensor-card-editor');
-  }
 }
 
-class DualSensorCardEditor extends LitElement {
-  static get properties() {
-    return {
-      hass: {},
-      config: {},
-    };
-  }
+customElements.define('dual-sensor-card', DualSensorCard);
 
-  static get styles() {
-    return css`
-      .config-row {
-        margin-bottom: 16px;
-      }
-      .config-label {
-        font-weight: bold;
-      }
-    `;
-  }
-
-  render() {
-    if (!this.hass) {
-      return html``;
-    }
-
-    return html`
-      <div class="config-row">
-        <div class="config-label">Switch Entity (entity_switch):</div>
-        <ha-entity-picker
-          .hass=${this.hass}
-          .value=${this.config.entity_switch}
-          @value-changed=${this._valueChanged}
-          .configValue=${'entity_switch'}
-        ></ha-entity-picker>
-      </div>
-      <div class="config-row">
-        <div class="config-label">Sensor Entity (entity_kwh):</div>
-        <ha-entity-picker
-          .hass=${this.hass}
-          .value=${this.config.entity_kwh}
-          @value-changed=${this._valueChanged}
-          .configValue=${'entity_kwh'}
-        ></ha-entity-picker>
-      </div>
-      <div class="config-row">
-        <div class="config-label">Show Friendly Name:</div>
-        <ha-switch
-          .checked=${this.config.show_friendly_name}
-          @change=${this._valueChanged}
-          .configValue=${'show_friendly_name'}
-        ></ha-switch>
-      </div>
-      <div class="config-row">
-        <div class="config-label">Show Icon:</div>
-        <ha-switch
-          .checked=${this.config.show_icon}
-          @change=${this._valueChanged}
-          .configValue=${'show_icon'}
-        ></ha-switch>
-      </div>
-      <div class="config-row">
-        <div class="config-label">Show State:</div>
-        <ha-switch
-          .checked=${this.config.show_state}
-          @change=${this._valueChanged}
-          .configValue=${'show_state'}
-        ></ha-switch>
-      </div>
-      <div class="config-row">
-        <div class="config-label">Icon:</div>
-        <ha-icon-picker
-          .value=${this.config.icon}
-          @value-changed=${this._valueChanged}
-          .configValue=${'icon'}
-        ></ha-icon-picker>
-      </div>
-    `;
-  }
-
-  _valueChanged(ev) {
-    if (!this.config) {
-      return;
-    }
-    const target = ev.target;
-    const value = target.checked !== undefined ? target.checked : target.value;
-    const configValue = target.configValue;
-    this.config = {
-      ...this.config,
-      [configValue]: value,
-    };
-    this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
-  }
-}
-
-if (!customElements.get('dual-sensor-card')) {
-  customElements.define('dual-sensor-card', DualSensorCard);
-}
-if (!customElements.get('dual-sensor-card-editor')) {
-  customElements.define('dual-sensor-card-editor', DualSensorCardEditor);
-}
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: 'dual-sensor-card',
+  name: 'Dual Sensor Card',
+  preview: true,
+  description: 'Kombinierte Switch- und Sensor-Karte mit Anpassungsoptionen',
+});
