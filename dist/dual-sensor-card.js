@@ -7,6 +7,7 @@ class DualSensorCard extends HTMLElement {
   set hass(hass) {
     if (!this.config) return;
 
+    this._hass = hass;
     const switchEntity = hass.states[this.config.switch_entity];
     const sensorEntity = hass.states[this.config.sensor_entity];
 
@@ -64,7 +65,7 @@ class DualSensorCard extends HTMLElement {
                     <div class="title">${this.config.name || 'Dual Sensor'}</div>
                     <div class="value">${sensorEntity.state} ${sensorEntity.attributes.unit_of_measurement || ''}</div>
                 </div>
-                <div class="toggle ${switchEntity.state === 'on' ? '' : 'off'}" @click="toggleSwitch()">
+                <div class="toggle ${switchEntity.state === 'on' ? '' : 'off'}" @click="this.toggleSwitch()">
                     <div class="handle"></div>
                 </div>
             </div>
@@ -72,8 +73,11 @@ class DualSensorCard extends HTMLElement {
   }
 
   toggleSwitch() {
-    const event = new Event('hass-toggle-switch', { bubbles: true, composed: true });
-    this.dispatchEvent(event);
+    if (!this._hass || !this.config.switch_entity) return;
+
+    this._hass.callService('switch', 'toggle', {
+      entity_id: this.config.switch_entity
+    });
   }
 
   setConfig(config) {
