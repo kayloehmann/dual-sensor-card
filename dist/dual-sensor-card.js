@@ -147,12 +147,53 @@ class DualSensorCardEditor extends HTMLElement {
     this.render();
   }
 
+  set hass(hass) {
+    this._hass = hass;
+    this.render();
+  }
+
   render() {
+    if (!this._hass) return;
+
+    const entities = Object.keys(this._hass.states).filter(
+      (entity) => entity.startsWith('switch.') || entity.startsWith('sensor.')
+    );
+
     this.shadowRoot.innerHTML = `
+            <style>
+                .editor {
+                    padding: 16px;
+                }
+                label {
+                    display: block;
+                    margin-bottom: 8px;
+                }
+                select, input {
+                    width: 100%;
+                    padding: 4px;
+                }
+            </style>
             <div class="editor">
-                <p>Dual Sensor Card Configuration</p>
+                <label>Switch Entity:</label>
+                <select id="switch_entity">
+                    ${entities.filter(e => e.startsWith('switch.')).map(e => `<option value="${e}" ${this.config.switch_entity === e ? 'selected' : ''}>${e}</option>`).join('')}
+                </select>
+                
+                <label>Sensor Entity:</label>
+                <select id="sensor_entity">
+                    ${entities.filter(e => e.startsWith('sensor.')).map(e => `<option value="${e}" ${this.config.sensor_entity === e ? 'selected' : ''}>${e}</option>`).join('')}
+                </select>
             </div>
         `;
+
+    this.shadowRoot.querySelector('#switch_entity').addEventListener('change', (event) => this.updateConfig(event, 'switch_entity'));
+    this.shadowRoot.querySelector('#sensor_entity').addEventListener('change', (event) => this.updateConfig(event, 'sensor_entity'));
+  }
+
+  updateConfig(event, key) {
+    if (!this.config) return;
+    this.config = { ...this.config, [key]: event.target.value };
+    this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
   }
 }
 
