@@ -15,6 +15,12 @@ class DualSensorCard extends HTMLElement {
 
     const friendlyName = this.config.name || sensorEntity.attributes.friendly_name || 'Dual Sensor';
     const icon = this.config.icon || 'mdi:lightbulb';
+    const showState = this.config.show_state !== false;
+    const showIcon = this.config.show_icon !== false;
+    const iconSize = this.config.icon_size || '24px';
+    const tapAction = this.config.tap_action || 'toggle';
+    const holdAction = this.config.hold_action || 'more-info';
+
     const switchState = switchEntity.state === 'on';
     const sensorValue = `${sensorEntity.state} ${sensorEntity.attributes.unit_of_measurement || ''}`;
 
@@ -39,8 +45,9 @@ class DualSensorCard extends HTMLElement {
                     text-align: center;
                 }
                 .icon {
-                    font-size: 32px;
+                    font-size: ${iconSize};
                     color: var(--state-icon-color, #44739e);
+                    display: ${showIcon ? 'block' : 'none'};
                 }
                 .title {
                     font-size: 16px;
@@ -49,6 +56,7 @@ class DualSensorCard extends HTMLElement {
                 .value {
                     font-size: 14px;
                     color: var(--primary-text-color);
+                    display: ${showState ? 'block' : 'none'};
                 }
                 .toggle {
                     margin-top: 10px;
@@ -71,7 +79,7 @@ class DualSensorCard extends HTMLElement {
                     transform: translateX(${switchState ? '20px' : '0'});
                 }
             </style>
-            <div class="card">
+            <div class="card" @click="this.handleTap()" @contextmenu="this.handleHold(event)">
                 <ha-icon class="icon" icon="${icon}"></ha-icon>
                 <div class="title">${friendlyName}</div>
                 <div class="value">${sensorValue}</div>
@@ -87,6 +95,19 @@ class DualSensorCard extends HTMLElement {
   toggleSwitch() {
     if (!this._hass || !this.config.switch_entity) return;
     this._hass.callService('switch', 'toggle', {
+      entity_id: this.config.switch_entity
+    });
+  }
+
+  handleTap() {
+    this._hass.callService('homeassistant', this.config.tap_action, {
+      entity_id: this.config.switch_entity
+    });
+  }
+
+  handleHold(event) {
+    event.preventDefault();
+    this._hass.callService('homeassistant', this.config.hold_action, {
       entity_id: this.config.switch_entity
     });
   }
@@ -110,83 +131,14 @@ class DualSensorCard extends HTMLElement {
     return {
       switch_entity: "switch.example",
       sensor_entity: "sensor.example",
-      icon: "mdi:lightbulb"
+      icon: "mdi:lightbulb",
+      show_state: true,
+      show_icon: true,
+      icon_size: "24px",
+      tap_action: "toggle",
+      hold_action: "more-info"
     };
   }
 }
 
 customElements.define('dual-sensor-card', DualSensorCard);
-
-class DualSensorCardEditor extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-  }
-
-  setConfig(config) {
-    this.config = { ...config } || {};
-    this.render();
-  }
-
-  set hass(hass) {
-    this._hass = hass;
-    this.render();
-  }
-
-  render() {
-    if (!this._hass) return;
-    if (!this.config) this.config = {};
-
-    const entities = Object.keys(this._hass.states).filter(
-      (entity) => entity.startsWith('switch.') || entity.startsWith('sensor.')
-    );
-
-    const mdiIcons = [
-      "mdi:lightbulb", "mdi:power", "mdi:fan", "mdi:thermometer", "mdi:gauge"
-    ];
-
-    this.shadowRoot.innerHTML = `
-            <style>
-                .editor {
-                    padding: 16px;
-                }
-                label {
-                    display: block;
-                    margin-bottom: 8px;
-                }
-                select, input {
-                    width: 100%;
-                    padding: 4px;
-                }
-            </style>
-            <div class="editor">
-                <label>Switch Entity:</label>
-                <select id="switch_entity">
-                    ${entities.filter(e => e.startsWith('switch.')).map(e => `<option value="${e}" ${this.config.switch_entity === e ? 'selected' : ''}>${e}</option>`).join('')}
-                </select>
-                
-                <label>Sensor Entity:</label>
-                <select id="sensor_entity">
-                    ${entities.filter(e => e.startsWith('sensor.')).map(e => `<option value="${e}" ${this.config.sensor_entity === e ? 'selected' : ''}>${e}</option>`).join('')}
-                </select>
-                
-                <label>Icon:</label>
-                <select id="icon">
-                    ${mdiIcons.map(icon => `<option value="${icon}" ${this.config.icon === icon ? 'selected' : ''}>${icon}</option>`).join('')}
-                </select>
-            </div>
-        `;
-
-    this.shadowRoot.querySelector('#switch_entity').addEventListener('change', (event) => this.updateConfig(event, 'switch_entity'));
-    this.shadowRoot.querySelector('#sensor_entity').addEventListener('change', (event) => this.updateConfig(event, 'sensor_entity'));
-    this.shadowRoot.querySelector('#icon').addEventListener('change', (event) => this.updateConfig(event, 'icon'));
-  }
-
-  updateConfig(event, key) {
-    if (!this.config) this.config = {};
-    this.config = { ...this.config, [key]: event.target.value };
-    this.dispatchEvent(new CustomEvent('config-changed', { detail: { config: this.config } }));
-  }
-}
-
-customElements.define('dual-sensor-card-editor', DualSensorCardEditor);
