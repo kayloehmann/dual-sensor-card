@@ -1,5 +1,12 @@
 {
     "name": "Dual Sensor Card",
-    "filename": "dual-sensor-card.js",
-    "type": "plugin"
+    "description": "A custom Lovelace card to display two sensor values.",
+    "type": "lovelace",
+    "render_readme": true,
+    "resources": [
+        {
+            "url": "/hacsfiles/dual-sensor-card/dual-sensor-card.js",
+            "type": "module"
+        }
+    ]
 }
